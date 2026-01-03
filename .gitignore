@@ -2,7 +2,7 @@
 /public/hot
 /public/storage
 /storage/*.key
-/vendor
+# /vendor - Commented out for shared hosting deployment (no terminal access)
 .env
 .env.backup
 .env.production
