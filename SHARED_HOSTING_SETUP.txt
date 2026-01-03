@@ -1,0 +1,84 @@
+================================================================================
+  DROPLETS DOJO - SETUP SHARED HOSTING
+================================================================================
+
+PANDUAN SINGKAT DEPLOY KE SHARED HOSTING
+=========================================
+
+STEP 1: CLONE DARI GITHUB
+--------------------------
+cd public_html
+git clone https://github.com/yourusername/dojo.git .
+
+
+STEP 2: INSTALL DEPENDENCIES
+-----------------------------
+composer install --no-dev --optimize-autoloader
+
+
+STEP 3: SETUP ENVIRONMENT
+--------------------------
+cp .env.example .env
+php artisan key:generate
+
+Edit file .env:
+- APP_URL=https://yourdomain.com
+- APP_ENV=production
+- APP_DEBUG=false
+- Database credentials
+
+
+STEP 4: PERMISSIONS
+-------------------
+chmod -R 755 storage bootstrap/cache
+chmod 644 .env
+
+
+STEP 5: DATABASE
+----------------
+php artisan migrate --force
+
+
+STEP 6: OPTIMIZE
+----------------
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+
+STEP 7: POINT DOMAIN
+--------------------
+Point domain ke folder: public_html/public/
+
+Atau jika tidak bisa, pastikan file .htaccess di root sudah ada
+dan redirect ke folder public/
+
+
+PENTING!
+========
+✓ PHP 8.1+ required
+✓ mod_rewrite harus enabled
+✓ Domain harus point ke folder public/
+✓ File .env JANGAN di-commit ke GitHub
+✓ APP_DEBUG=false di production
+
+
+UPDATE DARI GITHUB
+==================
+git pull origin main
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+Atau jalankan: ./deploy.sh
+
+
+BANTUAN
+=======
+Lihat file DEPLOYMENT.md untuk panduan lengkap
+Lihat file README_SHARED_HOSTING.md untuk quick reference
+
+================================================================================
+

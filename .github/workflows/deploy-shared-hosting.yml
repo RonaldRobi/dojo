@@ -1,0 +1,24 @@
+name: Deployment Reminder
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Reminder
+        run: |
+          echo "🚀 Code telah di-update di GitHub!"
+          echo "📋 Jangan lupa deploy ke shared hosting dengan menjalankan:"
+          echo ""
+          echo "1. SSH ke hosting:"
+          echo "   cd public_html"
+          echo "   git pull origin main"
+          echo ""
+          echo "2. Atau jalankan deploy script:"
+          echo "   ./deploy.sh"
+          echo ""
+          echo "📖 Lihat DEPLOYMENT.md untuk panduan lengkap"
+
