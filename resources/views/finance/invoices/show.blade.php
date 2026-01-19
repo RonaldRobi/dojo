@@ -53,7 +53,7 @@
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Amount</dt>
-                        <dd class="mt-1 text-lg font-bold text-gray-900">RM {{ number_format($invoice->total_amount, 2) }}</dd>
+                        <dd class="mt-1 text-lg font-bold text-gray-900">RM {{ number_format($invoice->total_amount, 0) }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Due Date</dt>
@@ -80,8 +80,8 @@
                                     <tr>
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $item->description }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-500">{{ $item->quantity }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">RM {{ number_format($item->unit_price, 2) }}</td>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">RM {{ number_format($item->total_price, 2) }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-500">RM {{ number_format($item->unit_price, 0) }}</td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">RM {{ number_format($item->total_price, 0) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -99,7 +99,7 @@
                         @foreach($invoice->payments as $payment)
                             <div class="p-3 bg-green-50 rounded-lg">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-900">RM {{ number_format($payment->amount, 2) }}</span>
+                                    <span class="text-sm font-medium text-gray-900">RM {{ number_format($payment->amount, 0) }}</span>
                                     <span class="text-xs text-gray-500">{{ $payment->payment_date->format('M d, Y') }}</span>
                                 </div>
                                 <p class="text-xs text-gray-600 mt-1">{{ $payment->payment_method }}</p>

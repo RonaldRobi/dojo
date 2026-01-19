@@ -21,7 +21,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-green-100 text-sm font-medium uppercase tracking-wide">Today Revenue</p>
-                                <p class="mt-2 text-3xl font-bold text-white">RM {{ number_format($stats['today_revenue'], 2) }}</p>
+                                <p class="mt-2 text-3xl font-bold text-white">RM {{ number_format($stats['today_revenue'], 0) }}</p>
                                 <p class="mt-1 text-xs text-green-100">From verified payments</p>
                             </div>
                             <div class="p-4 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm transform group-hover:rotate-12 transition-transform duration-300">
@@ -40,7 +40,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-blue-100 text-sm font-medium uppercase tracking-wide">Monthly Revenue</p>
-                                <p class="mt-2 text-3xl font-bold text-white">RM {{ number_format($stats['monthly_revenue']['total_revenue'] ?? 0, 2) }}</p>
+                                <p class="mt-2 text-3xl font-bold text-white">RM {{ number_format($stats['monthly_revenue']['total_revenue'] ?? 0, 0) }}</p>
                                 <p class="mt-1 text-xs text-blue-100">{{ now()->format('F Y') }}</p>
                             </div>
                             <div class="p-4 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm transform group-hover:rotate-12 transition-transform duration-300">
@@ -127,7 +127,7 @@
                                             </div>
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-lg font-bold text-green-600">RM {{ number_format($payment->amount, 2) }}</p>
+                                            <p class="text-lg font-bold text-green-600">RM {{ number_format($payment->amount, 0) }}</p>
                                             <p class="text-xs text-gray-500">{{ $payment->payment_method }}</p>
                                         </div>
                                     </div>
@@ -179,7 +179,7 @@
                                             </div>
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-lg font-bold text-blue-600">RM {{ number_format($invoice->total_amount, 2) }}</p>
+                                            <p class="text-lg font-bold text-blue-600">RM {{ number_format($invoice->total_amount, 0) }}</p>
                                             <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full @if($bgColor === 'green') bg-green-100 text-green-800 @elseif($bgColor === 'red') bg-red-100 text-red-800 @else bg-yellow-100 text-yellow-800 @endif">
                                                 {{ ucfirst($invoice->status) }}
                                             </span>

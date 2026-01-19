@@ -23,28 +23,40 @@ class ClassController extends Controller
                 ->with('error', 'Instructor profile not found.');
         }
 
-        $classes = ClassSchedule::where('instructor_id', $instructor->id)
-            ->with(['dojoClass', 'enrollments.member'])
+        $schedules = ClassSchedule::where('instructor_id', $instructor->id)
             ->where('is_active', true)
-            ->get()
-            ->groupBy(function($schedule) {
-                return $schedule->dojoClass->name ?? 'Unnamed Class';
-            });
+            ->orderBy('class_name')
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
 
-        return view('coach.classes.index', compact('classes', 'instructor'));
+        return view('coach.classes.index', compact('schedules', 'instructor'));
     }
 
     public function show(ClassSchedule $classSchedule)
     {
         $user = auth()->user();
-        $instructor = Instructor::where('user_id', $user->id)->first();
+        $dojoId = currentDojo();
 
-        if ($classSchedule->instructor_id !== $instructor->id) {
+        $instructor = Instructor::where('user_id', $user->id)
+            ->where('dojo_id', $dojoId)
+            ->first();
+
+        if (!$instructor || $classSchedule->instructor_id !== $instructor->id) {
             abort(403, 'You do not have access to this class.');
         }
 
-        $classSchedule->load(['dojoClass', 'enrollments.member', 'attendances.member']);
-        $students = $classSchedule->enrollments()->with('member')->where('status', 'active')->get();
+        // Get all students in dojo
+        $students = \App\Models\Member::where('dojo_id', $dojoId)
+            ->where('status', 'active')
+            ->with('currentBelt')
+            ->orderBy('name')
+            ->get();
+
+        // Get attendance records for this schedule
+        $classSchedule->load(['attendances' => function($q) {
+            $q->with('member')->latest('attendance_date')->limit(50);
+        }]);
 
         return view('coach.classes.show', compact('classSchedule', 'students'));
     }

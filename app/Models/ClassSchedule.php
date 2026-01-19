@@ -13,7 +13,10 @@ class ClassSchedule extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'class_id',
+        'dojo_id',
+        'class_name',
+        'class_type',
+        'class_id', // Keep for backward compatibility, but nullable
         'instructor_id',
         'day_of_week',
         'start_time',
@@ -28,6 +31,11 @@ class ClassSchedule extends Model
         'is_active' => 'boolean',
         'day_of_week' => 'integer',
     ];
+
+    public function dojo(): BelongsTo
+    {
+        return $this->belongsTo(Dojo::class);
+    }
 
     public function dojoClass(): BelongsTo
     {

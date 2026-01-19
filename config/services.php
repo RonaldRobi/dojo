@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'bayarcash' => [
+        'api_key' => env('BAYARCASH_API_KEY'),
+        'secret_key' => env('BAYARCASH_SECRET_KEY'),
+        'portal_code' => env('BAYARCASH_PORTAL_CODE'),
+        'sandbox' => env('BAYARCASH_SANDBOX', true),
+    ],
+
 ];

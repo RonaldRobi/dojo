@@ -55,9 +55,14 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $event->name }}</div>
-                                @if($event->is_public)
-                                    <span class="text-xs text-purple-600">Public</span>
-                                @endif
+                                <div class="flex items-center gap-2 mt-1">
+                                    @if($event->is_public)
+                                        <span class="text-xs text-purple-600">Public</span>
+                                    @endif
+                                    @if(!$event->dojo_id)
+                                        <span class="text-xs text-blue-600 font-semibold">All Dojos</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 capitalize">
@@ -79,12 +84,17 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="{{ route('owner.events.show', $event) }}" class="text-purple-600 hover:text-purple-900 mr-3">View</a>
-                                <a href="{{ route('owner.events.edit', $event) }}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                                <form action="{{ route('owner.events.destroy', $event) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                </form>
+                                @if($event->dojo_id)
+                                    <a href="{{ route('owner.events.edit', $event) }}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
+                                    <form action="{{ route('owner.events.destroy', $event) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                    </form>
+                                @else
+                                    <span class="text-gray-400 mr-3" title="Cannot edit events for all dojos">Edit</span>
+                                    <span class="text-gray-400" title="Cannot delete events for all dojos">Delete</span>
+                                @endif
                             </td>
                         </tr>
                     @empty

@@ -38,14 +38,13 @@ class DashboardController extends Controller
             'today_classes' => ClassSchedule::where('instructor_id', $instructor->id)
                 ->where('day_of_week', $dayOfWeek)
                 ->where('is_active', true)
-                ->with(['dojoClass', 'enrollments.member'])
+                ->with(['enrollments.member'])
                 ->get(),
             'total_students' => \App\Models\ClassEnrollment::whereHas('classSchedule', function($q) use ($instructor) {
                 $q->where('instructor_id', $instructor->id);
             })->where('status', 'active')->distinct('member_id')->count(),
             'upcoming_classes' => ClassSchedule::where('instructor_id', $instructor->id)
                 ->where('is_active', true)
-                ->with('dojoClass')
                 ->orderBy('day_of_week')
                 ->orderBy('start_time')
                 ->limit(5)

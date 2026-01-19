@@ -25,7 +25,7 @@
         <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <dt class="text-sm font-medium text-gray-500">Amount</dt>
-                <dd class="mt-1 text-2xl font-bold text-gray-900">RM {{ number_format($payment->amount, 2) }}</dd>
+                <dd class="mt-1 text-2xl font-bold text-gray-900">RM {{ number_format($payment->amount, 0) }}</dd>
             </div>
             <div>
                 <dt class="text-sm font-medium text-gray-500">Payment Date</dt>

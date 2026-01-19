@@ -6,10 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\ProgressLog;
 use App\Models\Instructor;
+use App\Services\ProgressService;
 use Illuminate\Http\Request;
 
 class ProgressController extends Controller
 {
+    protected $progressService;
+
+    public function __construct(ProgressService $progressService)
+    {
+        $this->progressService = $progressService;
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -24,16 +32,16 @@ class ProgressController extends Controller
                 ->with('error', 'Instructor profile not found.');
         }
 
-        $query = Member::whereHas('enrollments.classSchedule', function($q) use ($instructor) {
-            $q->where('instructor_id', $instructor->id);
-        })->with(['currentBelt', 'enrollments.classSchedule']);
+        $query = Member::where('dojo_id', $dojoId)
+            ->where('status', 'active')
+            ->with(['currentBelt']);
 
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $members = $query->paginate(20);
+        $members = $query->orderBy('name')->paginate(20);
         $progressLogs = ProgressLog::where('instructor_id', $instructor->id)
             ->with('member')
             ->latest()
@@ -46,20 +54,23 @@ class ProgressController extends Controller
     public function show(Member $member)
     {
         $user = auth()->user();
-        $instructor = Instructor::where('user_id', $user->id)->first();
+        $dojoId = currentDojo();
 
-        // Verify member is in instructor's class
-        $hasAccess = $member->enrollments()
-            ->whereHas('classSchedule', function($q) use ($instructor) {
-                $q->where('instructor_id', $instructor->id);
-            })
-            ->exists();
+        $instructor = Instructor::where('user_id', $user->id)
+            ->where('dojo_id', $dojoId)
+            ->first();
 
-        if (!$hasAccess) {
+        if (!$instructor) {
+            return redirect()->route('coach.dashboard')
+                ->with('error', 'Instructor profile not found.');
+        }
+
+        // Verify member is in same dojo
+        if ($member->dojo_id !== $dojoId) {
             abort(403, 'You do not have access to this member.');
         }
 
-        $member->load(['currentBelt', 'enrollments.classSchedule.dojoClass', 'attendances']);
+        $member->load(['currentBelt', 'attendances']);
         $progressLogs = ProgressLog::where('member_id', $member->id)
             ->where('instructor_id', $instructor->id)
             ->latest()
@@ -88,6 +99,48 @@ class ProgressController extends Controller
 
         return redirect()->route('coach.progress.show', $member)
             ->with('success', 'Progress log added successfully.');
+    }
+
+    public function promote(Request $request, Member $member)
+    {
+        $user = auth()->user();
+        $dojoId = currentDojo();
+
+        $instructor = Instructor::where('user_id', $user->id)
+            ->where('dojo_id', $dojoId)
+            ->first();
+
+        if (!$instructor) {
+            return redirect()->route('coach.dashboard')
+                ->with('error', 'Instructor profile not found.');
+        }
+
+        // Verify member is in same dojo
+        if ($member->dojo_id !== $dojoId) {
+            abort(403, 'You do not have access to this member.');
+        }
+
+        $validated = $request->validate([
+            'rank_id' => 'required|exists:ranks,id',
+        ]);
+
+        $rank = \App\Models\Rank::findOrFail($validated['rank_id']);
+
+        // Verify rank belongs to same dojo
+        if ($rank->dojo_id !== $member->dojo_id) {
+            return redirect()->route('coach.progress.show', $member)
+                ->with('error', 'Invalid rank selected.');
+        }
+
+        // Promote member
+        $memberRank = $this->progressService->promoteMember(
+            $member,
+            $rank,
+            $instructor->id
+        );
+
+        return redirect()->route('coach.progress.show', $member)
+            ->with('success', "Student promoted to {$rank->name} successfully!");
     }
 }
 

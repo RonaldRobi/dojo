@@ -22,7 +22,7 @@
                         <option value="">Select Invoice</option>
                         @foreach($invoices as $invoice)
                             <option value="{{ $invoice->id }}" {{ old('invoice_id') == $invoice->id ? 'selected' : '' }}>
-                                #{{ $invoice->invoice_number }} - {{ $invoice->member->name }} (RM {{ number_format($invoice->total_amount, 2) }})
+                                #{{ $invoice->invoice_number }} - {{ $invoice->member->name }} (RM {{ number_format($invoice->total_amount, 0) }})
                             </option>
                         @endforeach
                     </select>

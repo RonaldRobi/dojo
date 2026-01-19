@@ -32,21 +32,34 @@ class CommunicationController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'is_global' => 'boolean',
+            'is_global' => 'nullable|boolean',
             'scheduled_at' => 'nullable|date',
             'dojo_ids' => 'nullable|array',
             'dojo_ids.*' => 'exists:dojos,id',
         ]);
 
-        $validated['dojo_id'] = $request->has('is_global') ? null : ($request->dojo_ids[0] ?? null);
+        // Set dojo_id to null for global announcements
+        // If not global and dojo_ids are provided, use the first one
+        // Otherwise, set to null (which is now allowed)
+        $isGlobal = $request->has('is_global') && $request->is_global;
+        
+        if ($isGlobal) {
+            $validated['dojo_id'] = null;
+        } else {
+            $validated['dojo_id'] = $request->dojo_ids[0] ?? null;
+        }
 
+        // Remove is_global from validated data as it's not in the database
+        unset($validated['is_global']);
+        
         $announcement = Announcement::create($validated);
 
         // Send to all dojos if global
-        if ($validated['is_global']) {
+        if ($isGlobal) {
             $dojos = Dojo::all();
             foreach ($dojos as $dojo) {
                 // Create recipients for each dojo
+                // TODO: Implement notification logic
             }
         }
 

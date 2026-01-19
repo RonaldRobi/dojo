@@ -78,4 +78,19 @@ class Member extends Model
     {
         return $this->hasMany(MemberRank::class);
     }
+
+    public function gradingResults(): HasMany
+    {
+        return $this->hasMany(GradingResult::class);
+    }
+
+    public function progressLogs(): HasMany
+    {
+        return $this->hasMany(ProgressLog::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

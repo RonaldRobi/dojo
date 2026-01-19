@@ -31,10 +31,21 @@
         }
     </script>
     
+    <!-- Alpine.js Cloak Style -->
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-gray-50" x-data="{ drawerOpen: false }">
     @auth
+        <!-- Mobile Drawer Component -->
+        <x-mobile-drawer />
+        
+        <!-- Mobile Bottom Navigation Component -->
+        <x-mobile-bottom-nav />
+        
         <div class="flex h-screen overflow-hidden bg-gray-100">
             <!-- Sidebar -->
             @include('layouts.sidebar')
@@ -45,7 +56,7 @@
                 @include('layouts.navigation')
                 
                 <!-- Page Content -->
-                <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+                <main class="flex-1 overflow-y-auto bg-gray-50 p-3 sm:p-4 lg:p-6 pb-24 lg:pb-6">
                     @if (session('success'))
                         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
                             <span class="block sm:inline">{{ session('success') }}</span>

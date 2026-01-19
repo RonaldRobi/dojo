@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name', 'Droplets Dojo') }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -44,17 +45,22 @@
 </head>
 <body class="font-sans antialiased bg-gray-50">
     @auth
-        <div class="flex h-screen overflow-hidden bg-gray-100">
+        <!-- Mobile Drawer Button - Simple Test -->
+        <button onclick="alert('Mobile button works!')" class="lg:hidden" style="position: fixed; top: 5rem; left: 1rem; z-index: 9999; padding: 1rem; background: red; color: white; border-radius: 0.5rem; font-weight: bold;">
+            MENU
+        </button>
+        
+        <div class="flex h-screen bg-gray-100">
             <!-- Sidebar -->
             @include('layouts.sidebar')
             
             <!-- Main Content -->
-            <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex-1 flex flex-col overflow-hidden relative">
                 <!-- Top Header -->
                 @include('layouts.navigation')
                 
                 <!-- Page Content -->
-                <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+                <main class="flex-1 overflow-y-auto bg-gray-50 p-3 sm:p-4 lg:p-6" style="padding-bottom: calc(5rem + env(safe-area-inset-bottom));">
                     @if (session('success'))
                         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
                             <span class="block sm:inline">{{ session('success') }}</span>
@@ -80,6 +86,13 @@
                     {{ $slot }}
                 </main>
             </div>
+        </div>
+    @endauth
+    
+    <!-- Mobile Bottom Navigation - Direct HTML Test -->
+    @auth
+        <div class="lg:hidden" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background: #ff0000; color: white; padding: 1rem; text-align: center; font-weight: bold;">
+            BOTTOM NAV TEST - If you see this, it works!
         </div>
     @else
         <div class="min-h-screen flex flex-col bg-gray-50">

@@ -48,7 +48,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $payment->payment_date->format('M d, Y') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $payment->invoice->member->name ?? 'N/A' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ $payment->invoice->invoice_number }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RM {{ number_format($payment->amount, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RM {{ number_format($payment->amount, 0) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{{ $payment->payment_method }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($payment->verified_by_user_id)

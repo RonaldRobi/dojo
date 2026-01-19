@@ -21,18 +21,11 @@ class AnnouncementController extends Controller
             abort(404, 'Member profile not found');
         }
 
+        // Get announcements for students (target_audience: 'all' or 'students')
         $announcements = \App\Models\Announcement::where('dojo_id', $dojoId)
-            ->where(function($q) use ($member) {
-                $q->where('target_type', 'all')
-                  ->orWhere(function($query) use ($member) {
-                      $query->where('target_type', 'member')
-                            ->whereJsonContains('target_ids', $member->id);
-                  })
-                  ->orWhere(function($query) use ($member) {
-                      $query->where('target_type', 'class')
-                            ->whereIn('target_ids', $member->enrollments()->pluck('class_schedule_id')->toArray());
-                  });
-            })
+            ->where('is_published', true)
+            ->whereIn('target_audience', ['all', 'students'])
+            ->with('dojo')
             ->latest()
             ->paginate(20);
 
@@ -44,7 +37,7 @@ class AnnouncementController extends Controller
         $user = auth()->user();
         $member = Member::where('user_id', $user->id)->first();
 
-        $announcement = \App\Models\Announcement::findOrFail($id);
+        $announcement = \App\Models\Announcement::with('dojo')->findOrFail($id);
 
         // Check if member has access
         if ($announcement->dojo_id !== $member->dojo_id) {

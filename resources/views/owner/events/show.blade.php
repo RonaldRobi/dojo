@@ -6,9 +6,11 @@
                 <p class="text-sm text-gray-600 mt-1">Event Details</p>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('owner.events.edit', $event) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    Edit
-                </a>
+                @if($event->dojo_id)
+                    <a href="{{ route('owner.events.edit', $event) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Edit
+                    </a>
+                @endif
                 <a href="{{ route('owner.events.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
                     Back to List
                 </a>
@@ -25,6 +27,22 @@
                         <dt class="text-sm font-medium text-gray-500">Event Name</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $event->name }}</dd>
                     </div>
+                    @if(!$event->dojo_id)
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Dojo</dt>
+                            <dd class="mt-1">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    All Dojos
+                                </span>
+                                <p class="mt-1 text-xs text-gray-500">This event is for all dojos and cannot be edited or deleted by owners.</p>
+                            </dd>
+                        </div>
+                    @elseif($event->dojo)
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Dojo</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $event->dojo->name }}</dd>
+                        </div>
+                    @endif
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Type</dt>
                         <dd class="mt-1">
@@ -52,7 +70,7 @@
                     @if($event->registration_fee)
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Registration Fee</dt>
-                            <dd class="mt-1 text-sm text-gray-900">RM {{ number_format($event->registration_fee, 2) }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900">RM {{ number_format($event->registration_fee, 0) }}</dd>
                         </div>
                     @endif
                     @if($event->registration_deadline)

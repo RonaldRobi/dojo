@@ -31,6 +31,9 @@ use App\Http\Controllers\Owner\MessageController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Owner\GalleryController;
 use App\Http\Controllers\Owner\AchievementController;
+use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
+use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
+use App\Http\Controllers\Owner\ReportController as OwnerReportController;
 use App\Http\Controllers\Finance\InvoiceController;
 use App\Http\Controllers\Finance\PaymentController;
 use App\Http\Controllers\Finance\MembershipController;
@@ -38,6 +41,10 @@ use App\Http\Controllers\Finance\DashboardController as FinanceDashboardControll
 use App\Http\Controllers\Coach\DashboardController as CoachDashboardController;
 use App\Http\Controllers\Coach\ClassController as CoachClassController;
 use App\Http\Controllers\Coach\ProgressController as CoachProgressController;
+use App\Http\Controllers\Coach\AttendanceController as CoachAttendanceController;
+use App\Http\Controllers\Coach\StudentController as CoachStudentController;
+use App\Http\Controllers\Coach\EventController as CoachEventController;
+use App\Http\Controllers\Coach\BroadcastingController as CoachBroadcastingController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\ClassController as StudentClassController;
 use App\Http\Controllers\Student\ProgressController as StudentProgressController;
@@ -48,6 +55,7 @@ use App\Http\Controllers\Parent\ChildController as ParentChildController;
 use App\Http\Controllers\Parent\ScheduleController as ParentScheduleController;
 use App\Http\Controllers\Parent\EventController as ParentEventController;
 use App\Http\Controllers\Parent\PaymentController as ParentPaymentController;
+use App\Http\Controllers\Parent\RegisterController as ParentRegisterController;
 use App\Http\Controllers\Public\PublicController;
 use App\Http\Controllers\Public\PublicEventController;
 use App\Http\Controllers\Auth\LoginController;
@@ -58,11 +66,24 @@ Route::get('/dojo/{dojo}', [PublicController::class, 'showDojo'])->name('public.
 Route::get('/events', [PublicEventController::class, 'index'])->name('public.events.index');
 Route::get('/events/{event}', [PublicEventController::class, 'show'])->name('public.events.show');
 
-// Authentication routes
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
-});
+// PUBLIC Payment Gateway Routes (Bayar.cash callbacks - NO MIDDLEWARE!)
+// These MUST be completely public for payment gateway to POST results
+Route::match(['get', 'post'], 'parent/payment/return/{invoice}', [ParentPaymentController::class, 'paymentReturn'])
+    ->name('parent.payment.return');
+Route::post('parent/payment/callback', [ParentPaymentController::class, 'paymentCallback'])
+    ->name('parent.payment.callback');
+Route::post('parent/payment/webhook', [ParentPaymentController::class, 'paymentWebhook'])
+    ->name('parent.payment.webhook');
+
+// Authentication routes (NO MIDDLEWARE - handled in controller)
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+
+// Parent Registration (Public)
+Route::get('/register/parent', [\App\Http\Controllers\Auth\ParentRegisterController::class, 'showEmailForm'])->name('parent.register.email');
+Route::post('/register/parent', [\App\Http\Controllers\Auth\ParentRegisterController::class, 'sendRegistrationLink'])->name('parent.register.send');
+Route::get('/register/parent/{token}', [\App\Http\Controllers\Auth\ParentRegisterController::class, 'showRegistrationForm'])->name('parent.register.complete');
+Route::post('/register/parent/{token}', [\App\Http\Controllers\Auth\ParentRegisterController::class, 'completeRegistration'])->name('parent.register.submit');
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -102,6 +123,7 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
     // Super Admin routes
     Route::prefix('admin')->name('admin.')->middleware(['role:super_admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('/dashboard/sync', [AdminDashboardController::class, 'sync'])->name('dashboard.sync');
         
         // Notifications
         Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
@@ -115,6 +137,8 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
         Route::post('users/{user}/remove-role', [RoleManagementController::class, 'removeRole'])->name('users.remove-role');
         Route::get('users/{user}/roles', [RoleManagementController::class, 'getUserRoles'])->name('users.roles');
         
+        Route::get('dojos/{dojo}/assign-owner', [AdminDojoController::class, 'assignOwnerForm'])->name('dojos.assign-owner');
+        Route::post('dojos/{dojo}/assign-owner', [AdminDojoController::class, 'assignOwner'])->name('dojos.assign-owner.store');
         Route::resource('dojos', AdminDojoController::class);
         
         Route::resource('audit-logs', AuditLogController::class)->only(['index', 'show']);
@@ -123,13 +147,7 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
         Route::get('system/dojos', [SystemController::class, 'getAllDojos'])->name('system.dojos');
         
         Route::prefix('reports')->name('reports.')->group(function() {
-            Route::get('retention/{dojo?}', [ReportController::class, 'retention'])->name('retention');
-            Route::get('revenue/{dojo}', [ReportController::class, 'revenue'])->name('revenue');
-            Route::get('attendance/{dojo}', [ReportController::class, 'attendance'])->name('attendance');
-            Route::get('top-classes/{dojo}', [ReportController::class, 'topClasses'])->name('top-classes');
-            Route::get('popular-classes', [ReportController::class, 'popularClasses'])->name('popular-classes');
-            Route::get('active-coaches', [ReportController::class, 'activeCoaches'])->name('active-coaches');
-            Route::get('student-progress', [ReportController::class, 'studentProgress'])->name('student-progress');
+            Route::get('revenue', [ReportController::class, 'revenue'])->name('revenue');
             Route::get('events', [ReportController::class, 'events'])->name('events');
         });
 
@@ -171,11 +189,26 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
 
         // Class & Schedule
         Route::prefix('classes')->name('classes.')->group(function() {
+            // Schedule Management (MUST be before {id} routes to avoid conflicts!)
+            Route::get('monitoring', [\App\Http\Controllers\Admin\ClassManagementController::class, 'monitoring'])->name('monitoring');
+            Route::get('calendar', [\App\Http\Controllers\Admin\ClassManagementController::class, 'calendar'])->name('calendar');
+            Route::post('schedule/store', [\App\Http\Controllers\Admin\ClassManagementController::class, 'storeSchedule'])->name('schedule.store');
+            Route::get('schedule/{id}/edit', [\App\Http\Controllers\Admin\ClassManagementController::class, 'editSchedule'])->name('schedule.edit');
+            Route::put('schedule/{id}', [\App\Http\Controllers\Admin\ClassManagementController::class, 'updateSchedule'])->name('schedule.update');
+            Route::delete('schedule/{id}', [\App\Http\Controllers\Admin\ClassManagementController::class, 'destroySchedule'])->name('schedule.destroy');
+            
+            // Other specific routes
             Route::get('templates', [\App\Http\Controllers\Admin\ClassManagementController::class, 'templates'])->name('templates');
             Route::get('capacity-standards', [\App\Http\Controllers\Admin\ClassManagementController::class, 'capacityStandards'])->name('capacity-standards');
-            Route::get('monitoring', [\App\Http\Controllers\Admin\ClassManagementController::class, 'monitoring'])->name('monitoring');
             Route::get('conflicts', [\App\Http\Controllers\Admin\ClassManagementController::class, 'conflicts'])->name('conflicts');
-            Route::get('calendar', [\App\Http\Controllers\Admin\ClassManagementController::class, 'calendar'])->name('calendar');
+            
+            // Class Management (Keep these at the end because of {id} parameter)
+            Route::get('create', [\App\Http\Controllers\Admin\ClassManagementController::class, 'create'])->name('create');
+            Route::post('store', [\App\Http\Controllers\Admin\ClassManagementController::class, 'store'])->name('store');
+            Route::get('{id}/edit', [\App\Http\Controllers\Admin\ClassManagementController::class, 'edit'])->name('edit');
+            Route::put('{id}', [\App\Http\Controllers\Admin\ClassManagementController::class, 'update'])->name('update');
+            Route::delete('{id}', [\App\Http\Controllers\Admin\ClassManagementController::class, 'destroy'])->name('destroy');
+            Route::get('{id}', [\App\Http\Controllers\Admin\ClassManagementController::class, 'show'])->name('show'); // MUST be last!
         });
 
         // Instructor Management
@@ -192,6 +225,8 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
         Route::prefix('members')->name('members.')->group(function() {
             Route::get('/', [MemberManagementController::class, 'index'])->name('index');
             Route::get('attendance-global', [MemberManagementController::class, 'attendanceGlobal'])->name('attendance-global');
+            Route::post('attendance-global/store', [MemberManagementController::class, 'storeAttendance'])->name('attendance.store');
+            Route::post('attendance-global/bulk-store', [MemberManagementController::class, 'bulkStoreAttendance'])->name('attendance.bulk-store');
             Route::get('status', [MemberManagementController::class, 'status'])->name('status');
             Route::get('medical-notes', [MemberManagementController::class, 'medicalNotes'])->name('medical-notes');
         });
@@ -205,6 +240,17 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
         });
 
         // Event & Competition
+        // Events Management (CRUD untuk semua dojo)
+        Route::resource('events', \App\Http\Controllers\Admin\EventManagementController::class)->names([
+            'index' => 'events.index',
+            'create' => 'events.create',
+            'store' => 'events.store',
+            'show' => 'events.show',
+            'edit' => 'events.edit',
+            'update' => 'events.update',
+            'destroy' => 'events.destroy',
+        ]);
+        
         Route::prefix('events')->name('events.')->group(function() {
             Route::get('national', [EventManagementController::class, 'national'])->name('national');
             Route::get('tournaments', [EventManagementController::class, 'tournaments'])->name('tournaments');
@@ -224,6 +270,10 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
             Route::get('notification-logs', [CommunicationController::class, 'notificationLogs'])->name('notification-logs');
         });
 
+        // Pricing Settings
+        Route::get('pricing', [\App\Http\Controllers\Admin\PricingController::class, 'index'])->name('pricing.index');
+        Route::post('pricing', [\App\Http\Controllers\Admin\PricingController::class, 'update'])->name('pricing.update');
+
         // System Settings
         Route::get('settings/master-data', [\App\Http\Controllers\Admin\SystemController::class, 'masterData'])->name('settings.master-data');
         Route::get('settings/whatsapp', [\App\Http\Controllers\Admin\SystemController::class, 'whatsappIntegration'])->name('settings.whatsapp');
@@ -236,6 +286,10 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
     // Owner routes
     Route::prefix('owner')->name('owner.')->middleware(['ensure.dojo.access', 'role:owner'])->group(function () {
         Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
+        
+        // Members - attendance routes (must be BEFORE resource route)
+        Route::get('members/attendance', [MemberController::class, 'attendance'])->name('members.attendance');
+        Route::post('members/attendance/bulk-store', [MemberController::class, 'bulkStoreAttendance'])->name('members.attendance.bulk-store');
         
         Route::resource('members', MemberController::class);
         Route::post('members/{member}/regenerate-qr', [MemberController::class, 'regenerateQR'])->name('members.regenerate-qr');
@@ -266,6 +320,16 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
         Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
         
+        // Finance
+        Route::resource('invoices', OwnerInvoiceController::class);
+        Route::resource('payments', OwnerPaymentController::class);
+        
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function() {
+            Route::get('/revenue', [OwnerReportController::class, 'revenue'])->name('revenue');
+            Route::get('/events', [OwnerReportController::class, 'events'])->name('events');
+        });
+        
         Route::prefix('classes/{classSchedule}/messages')->name('messages.')->group(function() {
             Route::get('/', [MessageController::class, 'index'])->name('index');
             Route::post('/', [MessageController::class, 'store'])->name('store');
@@ -289,11 +353,34 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
     // Coach routes
     Route::prefix('coach')->name('coach.')->middleware(['ensure.dojo.access', 'role:coach'])->group(function () {
         Route::get('/dashboard', [CoachDashboardController::class, 'index'])->name('dashboard');
+        
+        // Classes
         Route::get('classes', [CoachClassController::class, 'index'])->name('classes.index');
         Route::get('classes/{classSchedule}', [CoachClassController::class, 'show'])->name('classes.show');
+        
+        // Attendance
+        Route::get('attendance', [CoachAttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('attendance/create', [CoachAttendanceController::class, 'create'])->name('attendance.create');
+        Route::post('attendance', [CoachAttendanceController::class, 'store'])->name('attendance.store');
+        Route::post('attendance/bulk', [CoachAttendanceController::class, 'bulkStore'])->name('attendance.bulk-store');
+        
+        // Students
+        Route::get('students', [CoachStudentController::class, 'index'])->name('students.index');
+        Route::get('students/{member}', [CoachStudentController::class, 'show'])->name('students.show');
+        
+        // Events
+        Route::get('events', [CoachEventController::class, 'index'])->name('events.index');
+        Route::get('events/{event}', [CoachEventController::class, 'show'])->name('events.show');
+        
+        // Progress & Belt Promotion
         Route::get('progress', [CoachProgressController::class, 'index'])->name('progress.index');
         Route::get('progress/{member}', [CoachProgressController::class, 'show'])->name('progress.show');
         Route::post('progress/{member}', [CoachProgressController::class, 'store'])->name('progress.store');
+        Route::post('progress/{member}/promote', [CoachProgressController::class, 'promote'])->name('progress.promote');
+        
+        // Broadcasting
+        Route::get('broadcasting', [CoachBroadcastingController::class, 'index'])->name('broadcasting.index');
+        Route::post('broadcasting', [CoachBroadcastingController::class, 'store'])->name('broadcasting.store');
     });
 
     // Student routes
@@ -308,14 +395,31 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
         Route::get('announcements/{id}', [StudentAnnouncementController::class, 'show'])->name('announcements.show');
     });
 
-    // Parent routes
-    Route::prefix('parent')->name('parent.')->middleware(['ensure.dojo.access', 'role:parent'])->group(function () {
+    // Parent routes (AUTHENTICATED - NO dojo access restrictions)
+    Route::prefix('parent')->name('parent.')->middleware(['role:parent'])->group(function () {
+        // All parent routes accessible without dojo check (parent can access all dojos)
         Route::get('/dashboard', [ParentDashboardController::class, 'index'])->name('dashboard');
+        
+        // Child Management
         Route::get('children', [ParentChildController::class, 'index'])->name('children.index');
         Route::get('children/{member}', [ParentChildController::class, 'show'])->name('children.show');
+        Route::get('children/{member}/progress', [ParentChildController::class, 'progress'])->name('children.progress');
+        
+        // Child Registration
+        Route::get('register', [ParentRegisterController::class, 'create'])->name('register.create');
+        Route::post('register', [ParentRegisterController::class, 'store'])->name('register.store');
+        
+        // Payment routes
+        Route::get('payment/registration/{member}', [ParentPaymentController::class, 'showRegistrationPayment'])->name('payment.registration');
+        Route::post('payment/create/{invoice}', [ParentPaymentController::class, 'createPayment'])->name('payment.create');
+        
+        // Schedules & Events
         Route::get('schedules', [ParentScheduleController::class, 'index'])->name('schedules.index');
         Route::get('events', [ParentEventController::class, 'index'])->name('events.index');
         Route::get('events/{event}', [ParentEventController::class, 'show'])->name('events.show');
+        Route::post('events/{event}/register', [ParentEventController::class, 'register'])->name('events.register');
+        
+        // Payments & Invoices
         Route::get('payments', [ParentPaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/{invoice}', [ParentPaymentController::class, 'show'])->name('payments.show');
     });

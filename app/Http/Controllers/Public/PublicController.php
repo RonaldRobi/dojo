@@ -11,10 +11,19 @@ class PublicController extends Controller
 {
     public function index()
     {
-        // Landing page data
-        $dojos = Dojo::with('profile')->whereHas('profile')->get();
+        // Get all active dojos for display
+        $dojos = Dojo::orderBy('name')->get(['id', 'name', 'address', 'description']);
         
-        return view('public.index', compact('dojos'));
+        // Get upcoming events (if events table exists)
+        $upcomingEvents = [];
+        if (class_exists(\App\Models\Event::class)) {
+            $upcomingEvents = \App\Models\Event::where('event_date', '>=', now())
+                ->orderBy('event_date')
+                ->limit(3)
+                ->get();
+        }
+        
+        return view('public.index', compact('dojos', 'upcomingEvents'));
     }
 
     public function showDojo(Dojo $dojo)

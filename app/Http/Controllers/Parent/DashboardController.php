@@ -11,13 +11,14 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $dojoId = currentDojo();
-
-        // Get children (students linked to this parent)
-        $children = Member::whereHas('parents', function($q) use ($user, $dojoId) {
-            $q->where('parent_user_id', $user->id)
-              ->where('dojo_id', $dojoId);
-        })->with(['currentBelt', 'enrollments.classSchedule.dojoClass', 'dojo'])->get();
+        
+        // Get ALL children across ALL dojos (parent can access all dojos where they have children)
+        $memberIds = \App\Models\ParentStudent::where('parent_user_id', $user->id)
+            ->pluck('member_id');
+        
+        $children = Member::whereIn('id', $memberIds)
+            ->with(['currentBelt', 'dojo'])
+            ->get();
 
         $selectedChildId = $request->input('child_id');
         $selectedChild = $selectedChildId 
@@ -31,7 +32,7 @@ class DashboardController extends Controller
                 ->whereMonth('attendance_date', now()->month)
                 ->where('status', 'present')
                 ->count() : 0,
-            'selected_child_total_classes' => $selectedChild ? $selectedChild->enrollments()->where('status', 'active')->count() : 0,
+            'selected_child_total_classes' => $selectedChild ? $selectedChild->attendances()->count() : 0,
             'selected_child_progress' => $selectedChild ? $selectedChild->currentBelt : null,
             'pending_payments' => $selectedChild ? \App\Models\Invoice::where('member_id', $selectedChild->id)
                 ->where('status', 'pending')

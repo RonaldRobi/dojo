@@ -47,9 +47,21 @@ class RankSeeder extends Seeder
 
                 // Add requirements for each rank
                 $requirements = [
-                    ['description' => 'Minimum attendance: 20 classes', 'type' => 'attendance'],
-                    ['description' => 'Basic kata demonstration', 'type' => 'kata'],
-                    ['description' => 'Sparring skills assessment', 'type' => 'sparring'],
+                    [
+                        'type' => 'attendance_min',
+                        'value' => $rankData['level'] * 10,  // Higher belt = more attendance required
+                        'description' => 'Minimum number of classes attended required for promotion',
+                    ],
+                    [
+                        'type' => 'exam_required',
+                        'value' => 'yes',
+                        'description' => 'Must pass practical examination demonstrating techniques',
+                    ],
+                    [
+                        'type' => 'recommendation_required',
+                        'value' => 'yes',
+                        'description' => 'Requires instructor recommendation for promotion',
+                    ],
                 ];
 
                 foreach ($requirements as $req) {
@@ -57,35 +69,14 @@ class RankSeeder extends Seeder
                         [
                             'rank_id' => $rank->id,
                             'requirement_type' => $req['type'],
-                            'description' => $req['description'],
                         ],
                         [
-                            'requirement_value' => '20', // Default value
+                            'requirement_value' => (string)$req['value'],
+                            'description' => $req['description'],
                         ]
                     );
                 }
             }
-        }
-
-        // Create national ranks (null dojo_id)
-        $nationalRanks = [
-            ['name' => 'National White Belt', 'level' => 1, 'order' => 1, 'color' => '#FFFFFF'],
-            ['name' => 'National Yellow Belt', 'level' => 2, 'order' => 2, 'color' => '#FFFF00'],
-            ['name' => 'National Black Belt 1st Dan', 'level' => 8, 'order' => 8, 'color' => '#000000'],
-        ];
-
-        foreach ($nationalRanks as $rankData) {
-            $rank = Rank::updateOrCreate(
-                [
-                    'dojo_id' => null,
-                    'name' => $rankData['name'],
-                ],
-                [
-                    'level' => $rankData['level'],
-                    'order' => $rankData['order'],
-                    'color' => $rankData['color'],
-                ]
-            );
         }
 
         $this->command->info('Ranks and rank requirements seeded successfully!');

@@ -49,7 +49,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{{ $membership->type }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $membership->start_date->format('M d, Y') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $membership->end_date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RM {{ number_format($membership->price, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RM {{ number_format($membership->price, 0) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
                                     $statusColor = $membership->status === 'active' ? 'bg-green-100 text-green-800' : ($membership->status === 'expired' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800');

@@ -15,7 +15,7 @@ class ProgressController extends Controller
 
         $member = Member::where('user_id', $user->id)
             ->where('dojo_id', $dojoId)
-            ->with(['currentBelt', 'memberRanks.rank'])
+            ->with(['currentBelt', 'ranks.rank'])
             ->first();
 
         if (!$member) {
@@ -24,7 +24,7 @@ class ProgressController extends Controller
 
         $rankHistory = \App\Models\MemberRank::where('member_id', $member->id)
             ->with('rank')
-            ->orderBy('promoted_at', 'desc')
+            ->orderBy('achieved_at', 'desc')
             ->get();
 
         $progressLogs = \App\Models\ProgressLog::where('member_id', $member->id)

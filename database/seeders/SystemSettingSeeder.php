@@ -102,6 +102,20 @@ class SystemSettingSeeder extends Seeder
                 'description' => 'Invoice Due Days',
                 'category' => 'Payment',
             ],
+            [
+                'key' => 'registration_fee',
+                'value' => '150',
+                'type' => 'decimal',
+                'description' => 'Child Registration Fee (RM)',
+                'category' => 'Payment',
+            ],
+            [
+                'key' => 'uniform_price',
+                'value' => '100',
+                'type' => 'decimal',
+                'description' => 'Uniform Price (RM)',
+                'category' => 'Payment',
+            ],
 
             // Attendance Settings
             [

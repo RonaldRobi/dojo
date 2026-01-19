@@ -36,7 +36,7 @@
             </div>
             <div>
                 <dt class="text-sm font-medium text-gray-500">Price</dt>
-                <dd class="mt-1 text-lg font-bold text-gray-900">RM {{ number_format($membership->price, 2) }}</dd>
+                <dd class="mt-1 text-lg font-bold text-gray-900">RM {{ number_format($membership->price, 0) }}</dd>
             </div>
             <div>
                 <dt class="text-sm font-medium text-gray-500">Status</dt>

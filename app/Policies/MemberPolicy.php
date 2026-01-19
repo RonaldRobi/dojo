@@ -26,7 +26,7 @@ class MemberPolicy
 
         // Parent can view linked children
         if ($user->hasRole('parent')) {
-            return $member->parents()->where('parent_user_id', $user->id)->exists();
+            return $member->parents()->where('users.id', $user->id)->exists();
         }
 
         // Finance and Coach can view all in their dojo

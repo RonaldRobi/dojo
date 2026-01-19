@@ -1,19 +1,17 @@
 @auth
 <div class="bg-white border-b border-gray-200">
-    <div class="px-6 py-4">
+    <div class="px-3 sm:px-4 lg:px-6 py-3 lg:py-4">
         <div class="flex items-center justify-between">
             <!-- Page Title -->
-            <div>
+            <div class="flex-1 min-w-0">
                 @if(isset($header))
                     {{ $header }}
                 @else
-                    <h2 class="text-2xl font-bold text-gray-900">
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
                         @if(request()->routeIs('admin.*'))
                             Admin Dashboard
                         @elseif(request()->routeIs('owner.*'))
                             Owner Dashboard
-                        @elseif(request()->routeIs('finance.*'))
-                            Finance Dashboard
                         @elseif(request()->routeIs('coach.*'))
                             Coach Dashboard
                         @elseif(request()->routeIs('student.*'))
@@ -28,7 +26,7 @@
             </div>
 
             <!-- Right Actions -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4 ml-2">
                 <!-- Search Menu -->
                 <div class="relative hidden md:block" x-data="{ 
                     open: false, 
@@ -288,13 +286,21 @@
                 </button>
                 @endif
 
-                <!-- User Menu -->
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" type="button" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                <!-- Mobile Drawer Button (Only on mobile, next to notifications) -->
+                <button @click="drawerOpen = !drawerOpen" 
+                        class="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <!-- User Menu (Desktop Only) -->
+                <div class="relative hidden lg:block" x-data="{ open: false }">
+                    <button @click="open = !open" type="button" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-md">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
-                        <div class="hidden md:block text-left">
+                        <div class="text-left">
                             <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</p>
                             <p class="text-xs text-gray-500">
                                 @php
@@ -330,13 +336,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                                 </svg>
                                 System Settings
-                            </a>
-                            @elseif(auth()->user()->hasRole('owner'))
-                            <a href="{{ route('owner.settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <svg class="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                                </svg>
-                                Settings
                             </a>
                             @endif
                             <hr class="my-1">

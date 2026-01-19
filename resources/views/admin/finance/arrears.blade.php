@@ -14,12 +14,12 @@
         <div class="p-6 border-b border-gray-200 bg-gray-50 grid grid-cols-4 gap-4">
             <div class="bg-white p-4 rounded-lg border border-gray-200">
                 <p class="text-xs text-gray-500 mb-1">Pending Amount</p>
-                <p class="text-xl font-bold text-yellow-600">RM {{ number_format($stats['total_pending'] ?? 0, 2) }}</p>
+                <p class="text-xl font-bold text-yellow-600">RM {{ number_format($stats['total_pending'] ?? 0, 0) }}</p>
                 <p class="text-xs text-gray-500 mt-1">{{ $stats['count_pending'] ?? 0 }} invoices</p>
             </div>
             <div class="bg-white p-4 rounded-lg border border-gray-200">
                 <p class="text-xs text-gray-500 mb-1">Overdue Amount</p>
-                <p class="text-xl font-bold text-red-600">RM {{ number_format($stats['total_overdue'] ?? 0, 2) }}</p>
+                <p class="text-xl font-bold text-red-600">RM {{ number_format($stats['total_overdue'] ?? 0, 0) }}</p>
                 <p class="text-xs text-gray-500 mt-1">{{ $stats['count_overdue'] ?? 0 }} invoices</p>
             </div>
         </div>
@@ -56,7 +56,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $invoice->invoice_number ?? $invoice->id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $invoice->member->name ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RM {{ number_format($invoice->total_amount, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RM {{ number_format($invoice->total_amount, 0) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('d M Y') : '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $invoice->status === 'overdue' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' }}">

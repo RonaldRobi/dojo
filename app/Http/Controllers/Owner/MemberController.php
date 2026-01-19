@@ -140,4 +140,50 @@ class MemberController extends Controller
         $this->memberService->generateQRCode($member);
         return redirect()->back()->with('success', 'QR Code regenerated successfully.');
     }
+
+    public function attendance()
+    {
+        return view('owner.members.attendance');
+    }
+
+    public function bulkStoreAttendance(Request $request)
+    {
+        $dojoId = currentDojo();
+        
+        $validated = $request->validate([
+            'schedule_id' => 'required|exists:class_schedules,id',
+            'attendance_date' => 'required|date',
+            'students' => 'required|array',
+            'students.*.member_id' => 'required|exists:members,id',
+            'students.*.status' => 'required|in:present,late,absent,excused',
+            'students.*.notes' => 'nullable|string',
+        ]);
+
+        $scheduleId = $validated['schedule_id'];
+        $attendanceDate = $validated['attendance_date'];
+
+        foreach ($validated['students'] as $studentData) {
+            // Verify member belongs to owner's dojo
+            $member = Member::findOrFail($studentData['member_id']);
+            if ($member->dojo_id !== $dojoId) {
+                continue; // Skip if not owner's member
+            }
+
+            \App\Models\Attendance::updateOrCreate(
+                [
+                    'member_id' => $studentData['member_id'],
+                    'class_schedule_id' => $scheduleId,
+                    'attendance_date' => $attendanceDate,
+                ],
+                [
+                    'status' => $studentData['status'],
+                    'notes' => $studentData['notes'] ?? null,
+                    'checked_in_at' => now(),
+                    'checked_in_method' => 'owner_bulk',
+                ]
+            );
+        }
+
+        return back()->with('success', 'Attendance recorded successfully.');
+    }
 }

@@ -41,4 +41,9 @@ class EventRegistration extends Model
     {
         return $this->hasOne(EventCertificate::class);
     }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'payment_invoice_id');
+    }
 }

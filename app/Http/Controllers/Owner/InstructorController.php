@@ -41,21 +41,53 @@ class InstructorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
             'phone' => 'nullable|string',
             'specialization' => 'nullable|string',
             'bio' => 'nullable|string',
             'hire_date' => 'nullable|date',
             'status' => 'nullable|in:active,inactive',
             'certification_level' => 'nullable|string',
-            'user_id' => 'nullable|exists:users,id',
         ]);
 
-        $validated['dojo_id'] = currentDojo();
-        $instructor = Instructor::create($validated);
+        $dojoId = currentDojo();
 
-        return redirect()->route('owner.instructors.show', $instructor)
-            ->with('success', 'Instructor created successfully.');
+        // Create user account first
+        $user = \App\Models\User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+            'dojo_id' => $dojoId,
+            'status' => 'active',
+        ]);
+
+        // Assign coach role to user
+        $coachRole = \App\Models\Role::where('name', 'coach')->first();
+        if ($coachRole) {
+            $user->roles()->attach($coachRole->id, [
+                'dojo_id' => $dojoId,
+                'assigned_at' => now(),
+                'assigned_by_user_id' => auth()->id(),
+            ]);
+        }
+
+        // Create instructor profile
+        $instructor = Instructor::create([
+            'user_id' => $user->id,
+            'dojo_id' => $dojoId,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'specialization' => $validated['specialization'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'hire_date' => $validated['hire_date'] ?? now(),
+            'status' => $validated['status'] ?? 'active',
+            'certification_level' => $validated['certification_level'] ?? null,
+        ]);
+
+        return redirect()->route('owner.instructors.index')
+            ->with('success', 'Instructor created successfully with login credentials.');
     }
 
     public function show(Instructor $instructor)

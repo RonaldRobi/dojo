@@ -12,8 +12,11 @@ class EventController extends Controller
     {
         $dojoId = currentDojo();
         
-        $query = Event::where('dojo_id', $dojoId)
-            ->with(['registrations.member']);
+        $query = Event::where(function($q) use ($dojoId) {
+                $q->where('dojo_id', $dojoId)
+                  ->orWhereNull('dojo_id'); // Include events for all dojos
+            })
+            ->with(['registrations.member', 'dojo']);
 
         if ($request->has('type')) {
             $query->where('type', $request->type);
@@ -65,17 +68,27 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
-        $event->load(['registrations.member']);
+        $event->load(['registrations.member', 'dojo']);
         return view('owner.events.show', compact('event'));
     }
 
     public function edit(Event $event)
     {
+        // Check if event is for all dojos
+        if (!$event->dojo_id) {
+            abort(403, 'You cannot edit events for all dojos.');
+        }
+        
         return view('owner.events.edit', compact('event'));
     }
 
     public function update(Request $request, Event $event)
     {
+        // Check if event is for all dojos
+        if (!$event->dojo_id) {
+            abort(403, 'You cannot update events for all dojos.');
+        }
+        
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'type' => 'sometimes|required|in:grading,sparring,tournament,seminar,workshop',
@@ -97,6 +110,11 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
+        // Check if event is for all dojos
+        if (!$event->dojo_id) {
+            abort(403, 'You cannot delete events for all dojos.');
+        }
+        
         $event->delete();
         return redirect()->route('owner.events.index')
             ->with('success', 'Event deleted successfully.');

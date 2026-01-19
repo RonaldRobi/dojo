@@ -96,7 +96,7 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <h4 class="text-lg font-bold text-gray-900">{{ $schedule->dojoClass->name ?? 'N/A' }}</h4>
+                                            <h4 class="text-lg font-bold text-gray-900">{{ $schedule->class_name ?: 'Class Schedule' }}</h4>
                                             <p class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($schedule->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('g:i A') }}</p>
                                             <p class="text-xs text-blue-600 font-medium mt-1">{{ $schedule->enrollments->count() }} students enrolled</p>
                                         </div>
@@ -140,7 +140,7 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <h4 class="text-lg font-bold text-gray-900">{{ $schedule->dojoClass->name ?? 'N/A' }}</h4>
+                                            <h4 class="text-lg font-bold text-gray-900">{{ $schedule->class_name ?: 'Class Schedule' }}</h4>
                                             <p class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($schedule->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('g:i A') }}</p>
                                             <p class="text-xs text-purple-600 font-medium mt-1">
                                                 {{ ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][$schedule->day_of_week] }}

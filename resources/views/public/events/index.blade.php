@@ -56,7 +56,7 @@
                             <div class="flex items-center justify-between mb-2">
                                 <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{{ ucfirst($event->type) }}</span>
                                 @if($event->registration_fee > 0)
-                                    <span class="text-sm font-semibold text-gray-900">RM {{ number_format($event->registration_fee, 2) }}</span>
+                                    <span class="text-sm font-semibold text-gray-900">RM {{ number_format($event->registration_fee, 0) }}</span>
                                 @else
                                     <span class="text-sm font-semibold text-green-600">Free</span>
                                 @endif

@@ -1,8 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900">Global Dashboard</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Overview of entire system and branches</p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Global Dashboard</h2>
+                <p class="text-sm text-gray-500 mt-0.5">Overview of entire system and branches</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Last Synced Info -->
+                <div class="hidden md:flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="last-synced">Last synced: {{ now()->format('H:i:s') }}</span>
+                </div>
+                <!-- Sync Button -->
+                <form action="{{ route('admin.dashboard.sync') }}" method="POST" id="syncForm">
+                    @csrf
+                    <button type="submit" id="syncButton" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105">
+                        <svg class="w-5 h-5" id="syncIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span id="syncText">Sync Data</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </x-slot>
 
@@ -39,6 +60,63 @@
                 }
             }
             setInterval(updateTime, 1000);
+
+            // Sync Data Handler
+            document.getElementById('syncForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const syncButton = document.getElementById('syncButton');
+                const syncIcon = document.getElementById('syncIcon');
+                const syncText = document.getElementById('syncText');
+                const lastSynced = document.getElementById('last-synced');
+                
+                // Disable button and show loading
+                syncButton.disabled = true;
+                syncButton.classList.add('opacity-75', 'cursor-not-allowed');
+                syncIcon.classList.add('animate-spin');
+                syncText.textContent = 'Syncing...';
+                
+                // Submit form via fetch
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success state
+                        syncText.textContent = 'Synced!';
+                        syncIcon.classList.remove('animate-spin');
+                        
+                        // Update last synced time
+                        const now = new Date();
+                        const timeStr = String(now.getHours()).padStart(2, '0') + ':' + 
+                                       String(now.getMinutes()).padStart(2, '0') + ':' + 
+                                       String(now.getSeconds()).padStart(2, '0');
+                        lastSynced.textContent = 'Last synced: ' + timeStr;
+                        
+                        // Reload page after short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Sync error:', error);
+                    syncText.textContent = 'Sync Failed';
+                    syncIcon.classList.remove('animate-spin');
+                    
+                    // Reset button after delay
+                    setTimeout(() => {
+                        syncButton.disabled = false;
+                        syncButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                        syncText.textContent = 'Sync Data';
+                    }, 2000);
+                });
+            });
         </script>
         @endpush
 
@@ -53,7 +131,7 @@
                         <a href="{{ route('admin.dojos.index') }}" class="px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-sm">
                             Manage Branches
                         </a>
-                        <a href="{{ route('admin.reports.retention') }}" class="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg font-semibold hover:bg-opacity-30 transition-colors text-sm">
+                        <a href="{{ route('admin.reports.revenue') }}" class="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg font-semibold hover:bg-opacity-30 transition-colors text-sm">
                             View Reports
                         </a>
                     </div>
@@ -85,8 +163,8 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
-                    <p class="text-3xl font-bold text-gray-900">RM {{ number_format($stats['total_revenue'], 2) }}</p>
-                    <p class="text-xs text-gray-500 mt-2">RM {{ number_format($stats['monthly_revenue'], 2) }} this month</p>
+                    <p class="text-3xl font-bold text-gray-900">RM {{ number_format($stats['total_revenue'], 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-2">RM {{ number_format($stats['monthly_revenue'], 0) }} this month</p>
                     <!-- Mini Chart -->
                     <div class="mt-4 h-8">
                         <canvas class="mini-chart" data-color="#3b82f6" data-values="[40, 60, 80, 65, 90, 75]"></canvas>
@@ -183,7 +261,7 @@
                         <p class="text-sm text-gray-500 mt-1">Overall system revenue</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-2xl font-bold text-gray-900">RM {{ number_format($stats['total_revenue'], 2) }}</span>
+                        <span class="text-2xl font-bold text-gray-900">RM {{ number_format($stats['total_revenue'], 0) }}</span>
                         <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold">+15.3%</span>
                     </div>
                 </div>
@@ -197,7 +275,7 @@
                 <div class="grid grid-cols-3 gap-4 mt-6">
                     <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
                         <p class="text-xs font-medium text-blue-700 mb-1">This Month</p>
-                        <p class="text-xl font-bold text-blue-900">RM {{ number_format($stats['monthly_revenue'], 2) }}</p>
+                        <p class="text-xl font-bold text-blue-900">RM {{ number_format($stats['monthly_revenue'], 0) }}</p>
                     </div>
                     <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
                         <p class="text-xs font-medium text-purple-700 mb-1">Pending</p>
@@ -240,7 +318,7 @@
                             </div>
                             <span>View Audit Logs</span>
                         </a>
-                        <a href="{{ route('admin.reports.retention') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100">
+                        <a href="{{ route('admin.reports.revenue') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100">
                             <div class="p-2 bg-green-100 rounded-lg">
                                 <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>

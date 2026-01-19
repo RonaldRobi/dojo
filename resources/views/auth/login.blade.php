@@ -36,8 +36,16 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="min-h-screen flex">
-        <!-- Left Side - Branding -->
-        <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 relative overflow-hidden">
+        <!-- Left Side - Branding with Image -->
+        <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1555597408-26bc8e548a46?q=80&w=1200" 
+                     alt="Martial Arts Dojo" 
+                     class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-900/95 via-blue-900/90 to-indigo-900/95"></div>
+            </div>
+
             <!-- Decorative Elements -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
@@ -129,41 +137,37 @@
                     <p class="text-gray-600">Sign in to continue to your account</p>
                 </div>
 
-                <!-- Demo Users -->
-                <div class="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
-                    <p class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                        <svg class="h-4 w-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Quick Login (Demo Accounts)
-                    </p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="fillDemo('admin@dojo.com', 'password')" 
-                            class="px-3 py-2 text-xs font-medium bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105">
-                            🔑 Super Admin
-                        </button>
-                        <button type="button" onclick="fillDemo('owner@dojo.com', 'password')" 
-                            class="px-3 py-2 text-xs font-medium bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105">
-                            🏢 Owner
-                        </button>
-                        <button type="button" onclick="fillDemo('finance@dojo.com', 'password')" 
-                            class="px-3 py-2 text-xs font-medium bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105">
-                            💰 Finance
-                        </button>
-                        <button type="button" onclick="fillDemo('coach@dojo.com', 'password')" 
-                            class="px-3 py-2 text-xs font-medium bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105">
-                            👨‍🏫 Coach
-                        </button>
-                        <button type="button" onclick="fillDemo('student@dojo.com', 'password')" 
-                            class="px-3 py-2 text-xs font-medium bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105">
-                            🎓 Student
-                        </button>
-                        <button type="button" onclick="fillDemo('parent@dojo.com', 'password')" 
-                            class="px-3 py-2 text-xs font-medium bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105">
-                            👨‍👩‍👧 Parent
-                        </button>
+                <!-- Success Message -->
+                @if(session('success'))
+                    <div class="mb-6 rounded-lg bg-green-50 border border-green-200 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                @endif
+
+                <!-- Error Message -->
+                @if(session('error'))
+                    <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Login Form -->
                 <form class="space-y-6" action="{{ route('login') }}" method="POST" id="loginForm">
@@ -282,9 +286,15 @@
                 </form>
 
                 <!-- Footer -->
-                <div class="mt-8 text-center">
+                <div class="mt-8 text-center space-y-3">
                     <p class="text-sm text-gray-600">
-                        Don't have an account? 
+                        Are you a parent? 
+                        <a href="{{ route('parent.register.email') }}" class="font-medium text-purple-600 hover:text-purple-500 transition-colors">
+                            Register here
+                        </a>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        Need help? 
                         <a href="#" class="font-medium text-purple-600 hover:text-purple-500 transition-colors">
                             Contact administrator
                         </a>
@@ -293,14 +303,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function fillDemo(email, password) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            // Focus on email field
-            document.getElementById('email').focus();
-        }
-    </script>
 </body>
 </html>
