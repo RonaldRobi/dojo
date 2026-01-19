@@ -151,7 +151,8 @@
                                             </div>
                                         </label>
                                         
-                                        <!-- Direct Debit -->
+                                        <!-- Direct Debit - Hidden for now -->
+                                        {{--
                                         <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400" 
                                                :class="selectedChannel === '3' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
                                             <input type="radio" name="payment_channel" value="3" x-model="selectedChannel" class="mr-3 h-4 w-4 text-blue-600">
@@ -160,6 +161,7 @@
                                                 <p class="text-xs text-gray-500">Auto debit from your bank account</p>
                                             </div>
                                         </label>
+                                        --}}
                                         
                                         <!-- DuitNow QR -->
                                         <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400" 

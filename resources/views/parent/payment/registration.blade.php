@@ -99,7 +99,8 @@
                                     </div>
                                 </label>
 
-                                <!-- Direct Debit -->
+                                <!-- Direct Debit - Hidden for now -->
+                                {{-- 
                                 <label class="relative flex items-center p-3 bg-white border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400"
                                        :class="selectedChannel === '3' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
                                     <input type="radio" name="payment_channel" value="3" x-model="selectedChannel" class="sr-only">
@@ -123,6 +124,7 @@
                                         </div>
                                     </div>
                                 </label>
+                                --}}
 
                                 <!-- DuitNow QR -->
                                 <label class="relative flex items-center p-3 bg-white border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400"

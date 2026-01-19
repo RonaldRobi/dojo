@@ -104,7 +104,7 @@ class PaymentController extends Controller
     {
         // Validate payment channel selection
         $request->validate([
-            'payment_channel' => 'required|integer|in:1,3,6',
+            'payment_channel' => 'required|integer|in:1,6',
         ]);
         
         $invoice = Invoice::findOrFail($invoiceId);
@@ -122,7 +122,7 @@ class PaymentController extends Controller
             // According to Bayar.cash docs, these are required for checksum:
             // payment_channel (int), order_number, amount, payer_name, payer_email
             $paymentData = [
-                'payment_channel' => $paymentChannel, // From user selection: 1=FPX, 3=Direct Debit, 6=DuitNow QR
+                'payment_channel' => $paymentChannel, // From user selection: 1=FPX, 6=DuitNow QR
                 'order_number' => $invoice->invoice_number,
                 'amount' => number_format($invoice->total_amount, 2, '.', ''),
                 'payer_name' => $parent->name,
