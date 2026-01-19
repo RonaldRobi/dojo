@@ -27,8 +27,13 @@ class DashboardController extends Controller
             'active_dojos' => Dojo::whereHas('members')->count(),
             'total_users' => User::count(),
             'active_users' => User::where('status', 'active')->count(),
-            'total_members' => Member::count(),
-            'active_members' => Member::where('status', 'active')->count(),
+            'total_members' => User::whereHas('roles', function($query) {
+                $query->where('name', 'student');
+            })->count(),
+            'active_members' => User::where('status', 'active')
+                ->whereHas('roles', function($query) {
+                    $query->where('name', 'student');
+                })->count(),
             'total_classes' => DojoClass::count(),
             'active_classes' => DojoClass::where('is_active', true)->count(),
             'total_instructors' => Instructor::count(),
@@ -85,13 +90,17 @@ class DashboardController extends Controller
         }
 
         // Members Growth Chart Data (Last 6 months)
+        // Count new student users created each month
         $membersChartData = [];
         $membersChartLabels = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $membersChartLabels[] = $date->format('M Y');
-            $membersChartData[] = Member::whereMonth('join_date', $date->month)
-                ->whereYear('join_date', $date->year)
+            $membersChartData[] = User::whereHas('roles', function($query) {
+                    $query->where('name', 'student');
+                })
+                ->whereMonth('created_at', $date->month)
+                ->whereYear('created_at', $date->year)
                 ->count();
         }
 
