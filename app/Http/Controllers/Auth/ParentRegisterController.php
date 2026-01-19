@@ -35,12 +35,14 @@ class ParentRegisterController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
+        ], [
+            'email.unique' => 'This email is already registered. Please login instead.',
         ]);
 
         // Generate token
         $token = Str::random(60);
         
-        // Delete old tokens for this email
+        // Delete old tokens for this email (allow resend)
         ParentRegistrationToken::where('email', $validated['email'])->delete();
         
         // Store token in DATABASE (not session)
@@ -55,7 +57,8 @@ class ParentRegisterController extends Controller
             Mail::to($validated['email'])->send(new ParentRegistrationMail($token));
             
             return redirect()->route('parent.register.email')
-                ->with('success', 'Registration link has been sent to your email. Please check your inbox.');
+                ->with('success', 'Registration link has been sent to your email. Please check your inbox.')
+                ->with('sent_email', $validated['email']);
         } catch (\Exception $e) {
             return redirect()->route('parent.register.email')
                 ->with('error', 'Failed to send email. Please try again.');
