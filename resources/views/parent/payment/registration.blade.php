@@ -99,10 +99,10 @@
                                     </div>
                                 </label>
 
-                                <!-- Credit/Debit Card -->
+                                <!-- Direct Debit -->
                                 <label class="relative flex items-center p-3 bg-white border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400"
-                                       :class="selectedChannel === '12' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
-                                    <input type="radio" name="payment_channel" value="12" x-model="selectedChannel" class="sr-only">
+                                       :class="selectedChannel === '3' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
+                                    <input type="radio" name="payment_channel" value="3" x-model="selectedChannel" class="sr-only">
                                     <div class="flex items-center flex-1">
                                         <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
                                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,13 +110,13 @@
                                             </svg>
                                         </div>
                                         <div class="ml-3 flex-1">
-                                            <p class="text-sm font-bold text-gray-900">Credit/Debit Card</p>
-                                            <p class="text-xs text-gray-500 mt-0.5">Visa, Mastercard, American Express</p>
+                                            <p class="text-sm font-bold text-gray-900">Direct Debit</p>
+                                            <p class="text-xs text-gray-500 mt-0.5">Auto debit from your bank account</p>
                                         </div>
                                         <div class="ml-2 flex-shrink-0">
                                             <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
-                                                 :class="selectedChannel === '12' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
-                                                <svg x-show="selectedChannel === '12'" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                 :class="selectedChannel === '3' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
+                                                <svg x-show="selectedChannel === '3'" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                                 </svg>
                                             </div>
@@ -124,24 +124,24 @@
                                     </div>
                                 </label>
 
-                                <!-- E-Wallet -->
+                                <!-- DuitNow QR -->
                                 <label class="relative flex items-center p-3 bg-white border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400"
-                                       :class="selectedChannel === '7' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
-                                    <input type="radio" name="payment_channel" value="7" x-model="selectedChannel" class="sr-only">
+                                       :class="selectedChannel === '6' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
+                                    <input type="radio" name="payment_channel" value="6" x-model="selectedChannel" class="sr-only">
                                     <div class="flex items-center flex-1">
                                         <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                                             </svg>
                                         </div>
                                         <div class="ml-3 flex-1">
-                                            <p class="text-sm font-bold text-gray-900">E-Wallet</p>
-                                            <p class="text-xs text-gray-500 mt-0.5">Touch 'n Go, GrabPay, Boost</p>
+                                            <p class="text-sm font-bold text-gray-900">DuitNow QR</p>
+                                            <p class="text-xs text-gray-500 mt-0.5">Scan QR with any banking app</p>
                                         </div>
                                         <div class="ml-2 flex-shrink-0">
                                             <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
-                                                 :class="selectedChannel === '7' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
-                                                <svg x-show="selectedChannel === '7'" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                 :class="selectedChannel === '6' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
+                                                <svg x-show="selectedChannel === '6'" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                                 </svg>
                                             </div>

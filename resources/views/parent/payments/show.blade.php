@@ -134,14 +134,50 @@
                     <!-- Actions -->
                     @if($invoice->status === 'pending')
                         <div class="border-t border-gray-200 pt-6">
-                            <form action="{{ route('parent.payment.create', $invoice->id) }}" method="POST">
+                            <form action="{{ route('parent.payment.create', $invoice->id) }}" method="POST" x-data="{ selectedChannel: '1' }">
                                 @csrf
-                                <input type="hidden" name="payment_channel" value="1">
+                                
+                                <!-- Payment Method Selection -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Select Payment Method:</label>
+                                    <div class="space-y-2">
+                                        <!-- FPX Online Banking -->
+                                        <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400" 
+                                               :class="selectedChannel === '1' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
+                                            <input type="radio" name="payment_channel" value="1" x-model="selectedChannel" class="mr-3 h-4 w-4 text-blue-600">
+                                            <div class="flex-1">
+                                                <span class="font-medium text-gray-900">FPX Online Banking</span>
+                                                <p class="text-xs text-gray-500">Maybank, CIMB, Public Bank, etc.</p>
+                                            </div>
+                                        </label>
+                                        
+                                        <!-- Direct Debit -->
+                                        <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400" 
+                                               :class="selectedChannel === '3' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
+                                            <input type="radio" name="payment_channel" value="3" x-model="selectedChannel" class="mr-3 h-4 w-4 text-blue-600">
+                                            <div class="flex-1">
+                                                <span class="font-medium text-gray-900">Direct Debit</span>
+                                                <p class="text-xs text-gray-500">Auto debit from your bank account</p>
+                                            </div>
+                                        </label>
+                                        
+                                        <!-- DuitNow QR -->
+                                        <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-400" 
+                                               :class="selectedChannel === '6' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
+                                            <input type="radio" name="payment_channel" value="6" x-model="selectedChannel" class="mr-3 h-4 w-4 text-blue-600">
+                                            <div class="flex-1">
+                                                <span class="font-medium text-gray-900">DuitNow QR</span>
+                                                <p class="text-xs text-gray-500">Scan QR with any banking app</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                
                                 <button type="submit" class="inline-flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    Pay Now via FPX
+                                    Pay Now
                                 </button>
                             </form>
                         </div>
