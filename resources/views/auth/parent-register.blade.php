@@ -46,14 +46,14 @@
                                 </p>
                             </div>
                             @if(session('sent_email'))
-                            <form method="POST" action="{{ route('parent.register.send') }}" class="mt-3">
+                            <form method="POST" action="{{ route('parent.register.send') }}" class="mt-3" id="resendForm">
                                 @csrf
                                 <input type="hidden" name="email" value="{{ session('sent_email') }}">
-                                <button type="submit" class="text-xs font-medium text-green-700 hover:text-green-900 underline flex items-center">
+                                <button type="submit" id="resendBtn" class="text-xs font-medium text-green-700 hover:text-green-900 underline flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline">
                                     <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                     </svg>
-                                    Resend Email
+                                    <span id="resendText">Resend Email</span>
                                 </button>
                             </form>
                             @endif
@@ -150,6 +150,61 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Resend email timer (60 seconds cooldown)
+        const COOLDOWN_SECONDS = 60;
+        const resendBtn = document.getElementById('resendBtn');
+        const resendText = document.getElementById('resendText');
+        const resendForm = document.getElementById('resendForm');
+        
+        if (resendBtn) {
+            const justSent = {{ session('success') && session('sent_email') ? 'true' : 'false' }};
+            
+            // Check if there's an existing cooldown in localStorage
+            const cooldownEnd = localStorage.getItem('resendCooldownEnd');
+            const now = Math.floor(Date.now() / 1000);
+            
+            if (justSent) {
+                // Just sent email, start fresh countdown
+                const newCooldownEnd = Math.floor(Date.now() / 1000) + COOLDOWN_SECONDS;
+                localStorage.setItem('resendCooldownEnd', newCooldownEnd);
+                startCountdown(COOLDOWN_SECONDS);
+            } else if (cooldownEnd && now < cooldownEnd) {
+                // Resume existing countdown
+                startCountdown(cooldownEnd - now);
+            }
+            
+            // Handle form submit
+            resendForm.addEventListener('submit', function(e) {
+                if (resendBtn.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Set new cooldown
+                const cooldownEnd = Math.floor(Date.now() / 1000) + COOLDOWN_SECONDS;
+                localStorage.setItem('resendCooldownEnd', cooldownEnd);
+            });
+            
+            function startCountdown(seconds) {
+                let remaining = seconds;
+                resendBtn.disabled = true;
+                
+                const interval = setInterval(() => {
+                    if (remaining <= 0) {
+                        clearInterval(interval);
+                        resendBtn.disabled = false;
+                        resendText.textContent = 'Resend Email';
+                        localStorage.removeItem('resendCooldownEnd');
+                    } else {
+                        resendText.textContent = `Resend in ${remaining}s`;
+                        remaining--;
+                    }
+                }, 1000);
+            }
+        }
+    </script>
 </body>
 </html>
 
