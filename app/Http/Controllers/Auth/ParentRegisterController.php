@@ -7,6 +7,7 @@ use App\Mail\ParentRegistrationMail;
 use App\Models\User;
 use App\Models\Member;
 use App\Models\Dojo;
+use App\Models\ParentRegistrationToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -39,11 +40,14 @@ class ParentRegisterController extends Controller
         // Generate token
         $token = Str::random(60);
         
-        // Store token in session temporarily
-        session([
-            'parent_registration_token' => $token,
-            'parent_registration_email' => $validated['email'],
-            'parent_registration_expires' => now()->addHours(24),
+        // Delete old tokens for this email
+        ParentRegistrationToken::where('email', $validated['email'])->delete();
+        
+        // Store token in DATABASE (not session)
+        ParentRegistrationToken::create([
+            'email' => $validated['email'],
+            'token' => $token,
+            'expires_at' => now()->addHours(24),
         ]);
 
         // Send email with registration link
@@ -65,17 +69,19 @@ class ParentRegisterController extends Controller
             return redirect()->route('parent.dashboard');
         }
         
-        // Verify token
-        if (session('parent_registration_token') !== $token) {
-            abort(403, 'Invalid or expired registration link.');
+        // Verify token from DATABASE
+        $registrationToken = ParentRegistrationToken::where('token', $token)->first();
+        
+        if (!$registrationToken) {
+            abort(403, 'Invalid registration link.');
         }
 
-        if (session('parent_registration_expires') < now()) {
-            session()->forget(['parent_registration_token', 'parent_registration_email', 'parent_registration_expires']);
-            abort(403, 'Registration link has expired.');
+        if ($registrationToken->isExpired()) {
+            $registrationToken->delete();
+            abort(403, 'Registration link has expired. Please request a new one.');
         }
 
-        $email = session('parent_registration_email');
+        $email = $registrationToken->email;
 
         return view('auth.parent-complete-registration', compact('token', 'email'));
     }
@@ -83,14 +89,16 @@ class ParentRegisterController extends Controller
     public function completeRegistration(Request $request, $token)
     {
         try {
-            // Verify token
-            if (session('parent_registration_token') !== $token) {
+            // Verify token from DATABASE
+            $registrationToken = ParentRegistrationToken::where('token', $token)->first();
+            
+            if (!$registrationToken) {
                 return redirect()->route('login')
-                    ->with('error', 'Invalid or expired registration link. Please request a new one.');
+                    ->with('error', 'Invalid registration link. Please request a new one.');
             }
 
-            if (session('parent_registration_expires') < now()) {
-                session()->forget(['parent_registration_token', 'parent_registration_email', 'parent_registration_expires']);
+            if ($registrationToken->isExpired()) {
+                $registrationToken->delete();
                 return redirect()->route('login')
                     ->with('error', 'Registration link has expired. Please request a new one.');
             }
@@ -103,7 +111,7 @@ class ParentRegisterController extends Controller
             ]);
 
             // Verify email matches
-            if ($validated['email'] !== session('parent_registration_email')) {
+            if ($validated['email'] !== $registrationToken->email) {
                 return back()
                     ->withInput()
                     ->with('error', 'Email does not match the registration request.');
@@ -133,8 +141,8 @@ class ParentRegisterController extends Controller
                 ]);
             }
 
-            // Clear session
-            session()->forget(['parent_registration_token', 'parent_registration_email', 'parent_registration_expires']);
+            // Delete used token
+            $registrationToken->delete();
 
             // Redirect to login with success message
             return redirect()->route('login')
