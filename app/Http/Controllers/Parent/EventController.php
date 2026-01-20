@@ -107,14 +107,16 @@ class EventController extends Controller
         $invoice = \App\Models\Invoice::create([
             'dojo_id' => $member->dojo_id,
             'member_id' => $request->member_id,
-            'invoice_number' => 'INV-' . strtoupper(uniqid()),
+            'invoice_number' => 'INV-EVT-' . time() . '-' . $request->member_id,
             'type' => 'event', // Valid enum values: 'membership', 'class', 'event', 'private'
             'amount' => $event->registration_fee ?? 0,
             'discount_amount' => 0,
             'tax_amount' => 0,
             'total_amount' => $event->registration_fee ?? 0,
+            'invoice_date' => now(),
             'due_date' => now()->addDays(7),
             'status' => 'pending',
+            'description' => 'Event Registration: ' . $event->name . ' for ' . $member->name,
             'paid_at' => null,
         ]);
 

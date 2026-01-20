@@ -536,8 +536,21 @@ class PaymentController extends Controller
             ->first();
 
         if (!$invoice) {
-            // Get registration fee from settings or use default
-            $registrationFee = 150.00; // Default RM 150
+            // Get registration fee and uniform price from system settings
+            $registrationFee = \App\Models\SystemSetting::where('key', 'registration_fee')->value('value') ?? 150;
+            $uniformPrice = \App\Models\SystemSetting::where('key', 'uniform_price')->value('value') ?? 100;
+            
+            // Get package type from session (set during child registration)
+            $packageType = session('child_package_type', 'registration_only');
+            
+            // Calculate amount based on package type
+            if ($packageType === 'registration_with_uniform') {
+                $amount = $registrationFee + $uniformPrice; // RM 150 + RM 100 = RM 250
+                $description = 'Registration Fee + Uniform for ' . $member->name;
+            } else {
+                $amount = $registrationFee; // RM 150
+                $description = 'Registration Fee for ' . $member->name;
+            }
 
             $invoice = Invoice::create([
                 'invoice_number' => 'INV-REG-' . time() . '-' . $member->id,
@@ -546,13 +559,16 @@ class PaymentController extends Controller
                 'type' => 'membership',
                 'invoice_date' => now(),
                 'due_date' => now()->addDays(7),
-                'amount' => $registrationFee,
+                'amount' => $amount,
                 'discount_amount' => 0,
                 'tax_amount' => 0,
-                'total_amount' => $registrationFee,
+                'total_amount' => $amount,
                 'status' => 'pending',
-                'description' => 'Registration Fee for ' . $member->name,
+                'description' => $description,
             ]);
+            
+            // Clear session after invoice created
+            session()->forget('child_package_type');
         }
 
         return $invoice;
