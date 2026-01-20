@@ -30,8 +30,10 @@ class CheckUnpaidRegistration
 
             if ($member) {
                 // Check for unpaid registration invoice
+                // Registration invoices use type 'membership' with invoice number pattern 'INV-REG-*'
                 $unpaidRegistration = Invoice::where('member_id', $member->id)
-                    ->where('type', 'registration')
+                    ->where('type', 'membership')
+                    ->where('invoice_number', 'LIKE', 'INV-REG-%')
                     ->whereIn('status', ['pending', 'overdue'])
                     ->exists();
 
