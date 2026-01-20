@@ -31,16 +31,28 @@ class CheckUnpaidRegistration
             if ($member) {
                 // Check for unpaid registration invoice
                 // Registration invoices use type 'membership' with invoice number pattern 'INV-REG-*'
-                $unpaidRegistration = Invoice::where('member_id', $member->id)
+                
+                // First, check if there's already a PAID registration invoice this year
+                $hasPaidRegistration = Invoice::where('member_id', $member->id)
                     ->where('type', 'membership')
                     ->where('invoice_number', 'LIKE', 'INV-REG-%')
-                    ->whereIn('status', ['pending', 'overdue'])
+                    ->where('status', 'paid')
+                    ->whereYear('created_at', now()->year)
                     ->exists();
+                
+                // Only check for unpaid if no paid registration exists
+                if (!$hasPaidRegistration) {
+                    $unpaidRegistration = Invoice::where('member_id', $member->id)
+                        ->where('type', 'membership')
+                        ->where('invoice_number', 'LIKE', 'INV-REG-%')
+                        ->whereIn('status', ['pending', 'overdue', 'cancelled'])
+                        ->exists();
 
-                // If unpaid registration exists and not already on payment page, redirect
-                if ($unpaidRegistration && !$request->is('student/payments*')) {
-                    return redirect()->route('student.payments.index')
-                        ->with('payment_required', true);
+                    // If unpaid registration exists and not already on payment page, redirect
+                    if ($unpaidRegistration && !$request->is('student/payments*')) {
+                        return redirect()->route('student.payments.index')
+                            ->with('payment_required', true);
+                    }
                 }
             }
         }

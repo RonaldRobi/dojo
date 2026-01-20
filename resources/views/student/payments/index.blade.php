@@ -24,7 +24,8 @@
                             </div>
                             <div class="ml-4 flex-1">
                                 <h3 class="text-xl font-bold text-white mb-2">Payment Required!</h3>
-                                <p class="text-white text-base">You must complete your registration payment before accessing other features. Please pay the pending invoice below.</p>
+                                <p class="text-white text-base mb-2">You must complete your registration payment before accessing other features.</p>
+                                <p class="text-white text-base font-semibold">📱 Tell your parent to pay in payment menu.</p>
                             </div>
                         </div>
                     </div>
@@ -50,7 +51,7 @@
                                     // Check if this is unpaid registration invoice (type='membership' AND invoice_number starts with 'INV-REG-')
                                     $isUnpaidRegistration = $invoice->type === 'membership' 
                                         && str_starts_with($invoice->invoice_number, 'INV-REG-') 
-                                        && in_array($invoice->status, ['pending', 'overdue']);
+                                        && in_array($invoice->status, ['pending', 'overdue', 'cancelled']);
                                 @endphp
                                 <tr class="transition-colors duration-150 {{ $isUnpaidRegistration ? 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100' : 'hover:bg-gray-50' }}">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold {{ $isUnpaidRegistration ? 'text-red-900' : 'text-gray-900' }}">
@@ -102,7 +103,7 @@
                             // Check if this is unpaid registration invoice (type='membership' AND invoice_number starts with 'INV-REG-')
                             $isUnpaidRegistration = $invoice->type === 'membership' 
                                 && str_starts_with($invoice->invoice_number, 'INV-REG-') 
-                                && in_array($invoice->status, ['pending', 'overdue']);
+                                && in_array($invoice->status, ['pending', 'overdue', 'cancelled']);
                         @endphp
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden {{ $isUnpaidRegistration ? 'border-4 border-red-500 ring-4 ring-red-200' : 'border border-gray-200' }}">
                             @if($isUnpaidRegistration)

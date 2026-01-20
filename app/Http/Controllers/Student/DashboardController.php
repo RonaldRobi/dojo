@@ -25,11 +25,24 @@ class DashboardController extends Controller
 
         // Check for unpaid registration invoice
         // Registration invoices use type 'membership' with invoice number pattern 'INV-REG-*'
-        $unpaidRegistration = Invoice::where('member_id', $member->id)
+        
+        // First, check if there's already a PAID registration invoice this year
+        $hasPaidRegistration = Invoice::where('member_id', $member->id)
             ->where('type', 'membership')
             ->where('invoice_number', 'LIKE', 'INV-REG-%')
-            ->whereIn('status', ['pending', 'overdue'])
-            ->first();
+            ->where('status', 'paid')
+            ->whereYear('created_at', now()->year)
+            ->exists();
+        
+        // Only check for unpaid if no paid registration exists
+        $unpaidRegistration = null;
+        if (!$hasPaidRegistration) {
+            $unpaidRegistration = Invoice::where('member_id', $member->id)
+                ->where('type', 'membership')
+                ->where('invoice_number', 'LIKE', 'INV-REG-%')
+                ->whereIn('status', ['pending', 'overdue', 'cancelled'])
+                ->first();
+        }
 
         $stats = [
             'member' => $member,
