@@ -85,6 +85,9 @@ Route::post('/register/parent', [\App\Http\Controllers\Auth\ParentRegisterContro
 Route::get('/register/parent/{token}', [\App\Http\Controllers\Auth\ParentRegisterController::class, 'showRegistrationForm'])->name('parent.register.complete');
 Route::post('/register/parent/{token}', [\App\Http\Controllers\Auth\ParentRegisterController::class, 'completeRegistration'])->name('parent.register.submit');
 
+// API: Check username/email availability
+Route::get('/api/check-username-availability', [App\Http\Controllers\Parent\RegisterController::class, 'checkUsernameAvailability'])->name('api.check.username');
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

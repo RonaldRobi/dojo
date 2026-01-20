@@ -40,7 +40,22 @@ class RegisterController extends Controller
         $validated = $request->validate([
             'dojo_id' => 'required|exists:dojos,id',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            // Allow username (alphanumeric + underscore, 3-20 chars) OR email format
+            'email' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:users,email',
+                function ($attribute, $value, $fail) {
+                    // Must be either valid email OR valid username format
+                    $isEmail = filter_var($value, FILTER_VALIDATE_EMAIL);
+                    $isUsername = preg_match('/^[a-zA-Z0-9_]{3,20}$/', $value);
+                    
+                    if (!$isEmail && !$isUsername) {
+                        $fail('The username/email must be a valid email address or a username (3-20 characters, letters, numbers, and underscores only).');
+                    }
+                },
+            ],
             'password' => 'required|string|min:8|confirmed',
             'date_of_birth' => 'required|date',
             'medical_notes' => 'nullable|string',
@@ -122,6 +137,48 @@ class RegisterController extends Controller
                 ->withInput()
                 ->withErrors(['error' => 'An error occurred while registering your child: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Check if username/email is available (API endpoint for realtime validation)
+     */
+    public function checkUsernameAvailability(Request $request)
+    {
+        $username = $request->query('username');
+        
+        if (!$username) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Username is required'
+            ], 400);
+        }
+
+        // Check if username/email already exists
+        $exists = User::where('email', $username)->exists();
+
+        if ($exists) {
+            return response()->json([
+                'available' => false,
+                'message' => 'This username/email is already taken'
+            ]);
+        }
+
+        // Validate format
+        $isEmail = filter_var($username, FILTER_VALIDATE_EMAIL);
+        $isUsername = preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username);
+
+        if (!$isEmail && !$isUsername) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Invalid format. Use 3-20 characters (letters, numbers, underscores) or a valid email'
+            ]);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'Username/email is available',
+            'type' => $isEmail ? 'email' : 'username'
+        ]);
     }
 }
 

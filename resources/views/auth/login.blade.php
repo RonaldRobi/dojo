@@ -173,26 +173,26 @@
                 <form class="space-y-6" action="{{ route('login') }}" method="POST" id="loginForm">
                     @csrf
                     
-                    <!-- Email Field -->
+                    <!-- Email/Username Field -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Email address
+                            Email or Username
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
                             </div>
                             <input 
                                 id="email" 
                                 name="email" 
-                                type="email" 
-                                autocomplete="email" 
+                                type="text" 
+                                autocomplete="username" 
                                 required 
                                 value="{{ old('email') }}"
                                 class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 @error('email') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror" 
-                                placeholder="you@example.com">
+                                placeholder="username or email@example.com">
                         </div>
                         @error('email')
                             <p class="mt-2 text-sm text-red-600 flex items-center">

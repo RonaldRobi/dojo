@@ -44,10 +44,21 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
+        // Validate that we have login credentials
+        $request->validate([
+            'email' => 'required|string',
             'password' => 'required',
         ]);
+
+        $loginField = $request->input('email');
+        $password = $request->input('password');
+
+        // Determine if the input is an email or username
+        // Try to login with email field as-is (could be email or username in the 'email' column)
+        $credentials = [
+            'email' => $loginField,
+            'password' => $password,
+        ];
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
