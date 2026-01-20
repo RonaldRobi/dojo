@@ -388,14 +388,19 @@ Route::middleware(['auth', 'ensure.account.active'])->group(function () {
 
     // Student routes
     Route::prefix('student')->name('student.')->middleware(['ensure.dojo.access', 'role:student'])->group(function () {
-        Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-        Route::get('classes', [StudentClassController::class, 'index'])->name('classes.index');
-        Route::get('classes/{enrollment}', [StudentClassController::class, 'show'])->name('classes.show');
-        Route::get('progress', [StudentProgressController::class, 'index'])->name('progress.index');
+        // Payment routes (no unpaid check - allow access to payment page)
         Route::get('payments', [StudentPaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/{invoice}', [StudentPaymentController::class, 'show'])->name('payments.show');
-        Route::get('announcements', [StudentAnnouncementController::class, 'index'])->name('announcements.index');
-        Route::get('announcements/{id}', [StudentAnnouncementController::class, 'show'])->name('announcements.show');
+        
+        // Other student routes (check for unpaid registration)
+        Route::middleware(['check.unpaid.registration'])->group(function () {
+            Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+            Route::get('classes', [StudentClassController::class, 'index'])->name('classes.index');
+            Route::get('classes/{enrollment}', [StudentClassController::class, 'show'])->name('classes.show');
+            Route::get('progress', [StudentProgressController::class, 'index'])->name('progress.index');
+            Route::get('announcements', [StudentAnnouncementController::class, 'index'])->name('announcements.index');
+            Route::get('announcements/{id}', [StudentAnnouncementController::class, 'show'])->name('announcements.show');
+        });
     });
 
     // Parent routes (AUTHENTICATED - NO dojo access restrictions)

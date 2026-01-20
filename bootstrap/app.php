@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'permission' => \App\Http\Middleware\PermissionMiddleware::class,
                 'role' => \App\Http\Middleware\RoleMiddleware::class,
                 'ensure.account.active' => \App\Http\Middleware\EnsureAccountActive::class,
+                'check.unpaid.registration' => \App\Http\Middleware\CheckUnpaidRegistration::class,
             ]);
             
             // Exclude Bayar.cash payment gateway routes from CSRF verification

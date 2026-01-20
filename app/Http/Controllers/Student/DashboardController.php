@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Member;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -21,6 +22,12 @@ class DashboardController extends Controller
         if (!$member) {
             abort(404, 'Member not found');
         }
+
+        // Check for unpaid registration invoice
+        $unpaidRegistration = Invoice::where('member_id', $member->id)
+            ->where('type', 'registration')
+            ->whereIn('status', ['pending', 'overdue'])
+            ->first();
 
         $stats = [
             'member' => $member,
@@ -45,6 +52,6 @@ class DashboardController extends Controller
                 ->get(),
         ];
 
-        return view('dashboard.student', compact('stats'));
+        return view('dashboard.student', compact('stats', 'unpaidRegistration'));
     }
 }
