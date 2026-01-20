@@ -54,8 +54,8 @@
                                                     <div class="w-2 h-2 rounded-full mr-2" style="background-color: {{ '#' . substr(md5($item['child']->id), 0, 6) }};"></div>
                                                     {{ $item['child']->name }}
                                                 </div>
-                                                <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded">
-                                                    {{ $item['schedule']->dojo->name }}
+                                                <span class="px-2 py-1 {{ $item['schedule']->dojo ? 'bg-gray-100 text-gray-600' : 'bg-red-100 text-red-600' }} text-xs font-semibold rounded">
+                                                    {{ $item['schedule']->dojo->name ?? 'Dojo Undefined' }}
                                                 </span>
                                             </div>
 
